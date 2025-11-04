@@ -41,6 +41,12 @@ scikit-survival = "*"
 scikit-learn = "*"
 statsmodels = "*"
 
+# Metabolic modeling (COBRApy)
+cobra = "*"
+python-libsbml = "*"
+optlang = "*"
+glpk = "*"
+
 # Additional utilities
 openpyxl = "*"
 xlrd = "*"
@@ -55,18 +61,27 @@ biomarker-analysis = "python biomarker_analysis/scripts/select_marker_genes.py -
 
 biomarker-tutorial = "jupyter notebook biomarker_analysis/tutorial_biomarker_selection.ipynb"
 
+# Metabolic modeling tasks
+metabolic-analysis = "python metabolic_modeling/scripts/metabolic_target_finder.py --model_id textbook --output_dir metabolic_results --ko_methods single essential fva --visualization"
+
+metabolic-tutorial = "jupyter notebook metabolic_modeling/tutorial_metabolic_modeling.ipynb"
+
+metabolic-iml1515 = { cmd = "python metabolic_modeling/scripts/metabolic_target_finder.py --model_id iML1515 --output_dir metabolic_results_iml1515 --ko_methods single essential fva --visualization", description = "Run analysis with E. coli iML1515 model" }
+
 # Nanobody design tasks
 nanobody-design = "jupyter notebook nanobody_design/run_nanobody_design.ipynb"
 
 # Testing
 test-biomarker = { cmd = "python biomarker_analysis/scripts/select_marker_genes.py --input_file Example_TCGA_TNBC_data.csv --output_dir test_results --n_top_genes 10 --methods cox logrank", description = "Quick test of biomarker analysis" }
 
+test-metabolic = { cmd = "python metabolic_modeling/scripts/metabolic_target_finder.py --model_id textbook --output_dir test_results --ko_methods single essential --visualization", description = "Quick test of metabolic modeling" }
+
 # Jupyter lab
 lab = "jupyter lab"
 notebook = "jupyter notebook"
 
 # Clean up
-clean = "rm -rf biomarker_results test_results __pycache__ .ipynb_checkpoints"
+clean = "rm -rf biomarker_results metabolic_results metabolic_results_iml1515 test_results __pycache__ .ipynb_checkpoints"
 
 [feature.dev.dependencies]
 # Development dependencies
@@ -96,9 +111,17 @@ description = "Dependencies for biomarker analysis and survival modeling"
 # Already included in main dependencies
 # lifelines, scikit-survival, scikit-learn, statsmodels
 
+[feature.metabolic-modeling]
+description = "Dependencies for genome-scale metabolic modeling"
+
+[feature.metabolic-modeling.dependencies]
+# Already included in main dependencies
+# cobra, python-libsbml, optlang, glpk
+
 [environments]
 default = { solve-group = "default" }
 dev = { features = ["dev"], solve-group = "default" }
 nanobody = { features = ["nanobody-design"], solve-group = "default" }
 biomarker = { features = ["biomarker-analysis"], solve-group = "default" }
-full = { features = ["dev", "nanobody-design", "biomarker-analysis"], solve-group = "default" }
+metabolic = { features = ["metabolic-modeling"], solve-group = "default" }
+full = { features = ["dev", "nanobody-design", "biomarker-analysis", "metabolic-modeling"], solve-group = "default" }

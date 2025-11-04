@@ -118,6 +118,158 @@ The tutorial covers:
 - Result visualization and interpretation
 - Exporting results for further analysis
 
+### Genome-Scale Metabolic Modeling
+
+The Virtual Lab includes a comprehensive toolkit for genome-scale metabolic modeling using COBRApy. This module enables identification of gene knockout/knockdown targets for metabolic engineering, drug discovery, and systems biology applications.
+
+#### Features
+
+- **Constraint-Based Modeling**: Flux Balance Analysis (FBA) and Flux Variability Analysis (FVA)
+- **Gene Knockout Simulation**: Single and double gene knockout analysis
+- **Essential Gene Identification**: Find critical genes for survival
+- **Synthetic Lethality Discovery**: Identify gene pairs that are lethal when deleted together
+- **Growth-Coupled Production**: Design strains for optimal bioproduction
+- **Multiple Model Support**: E. coli, human (Recon3D), yeast, and custom models
+
+#### Quick Start
+
+**Using Pixi (Recommended):**
+
+```bash
+# Run metabolic analysis with E. coli core model (fast)
+pixi run metabolic-analysis
+
+# Run with larger E. coli iML1515 model
+pixi run metabolic-iml1515
+
+# Launch the interactive tutorial
+pixi run metabolic-tutorial
+```
+
+**Using Python directly:**
+
+```bash
+cd metabolic_modeling/scripts
+
+# E. coli core model (fast, for testing)
+python metabolic_target_finder.py \
+    --model_id textbook \
+    --output_dir ../../metabolic_results \
+    --ko_methods single essential fva \
+    --visualization
+
+# E. coli iML1515 (comprehensive)
+python metabolic_target_finder.py \
+    --model_id iML1515 \
+    --output_dir ../../metabolic_results \
+    --ko_methods single essential fva \
+    --growth_threshold 0.1 \
+    --visualization
+```
+
+**Using Jupyter Notebook:**
+
+```bash
+jupyter notebook metabolic_modeling/tutorial_metabolic_modeling.ipynb
+```
+
+#### Available Models
+
+**From BiGG Database:**
+- `textbook`: E. coli core model (95 reactions, 72 genes) - Fast, for learning
+- `iML1515`: Latest E. coli model (2,712 reactions, 1,877 genes) - Production use
+- `iJO1366`: Previous E. coli model (2,583 reactions, 1,366 genes)
+- `Recon3D`: Human metabolism (13,543 reactions, 3,288 genes) - Drug discovery
+- `iMM904`: S. cerevisiae (1,577 reactions, 904 genes) - Yeast engineering
+
+**Custom Models:**
+- Load from SBML, JSON, or MAT files
+- Place in `metabolic_modeling/models/` directory
+
+#### Analysis Methods
+
+1. **Single Gene Knockout**
+   - Systematically delete each gene
+   - Measure growth impact
+   - Classify essential vs. non-essential genes
+
+2. **Essential Gene Analysis**
+   - Identify genes critical for survival
+   - Applications: Antibiotic targets, cancer drug discovery
+   - Rank by criticality
+
+3. **Double Gene Knockout (Synthetic Lethality)**
+   - Find gene pairs that are lethal together
+   - Applications: Combination therapy design
+   - Identify synergistic targets
+
+4. **Flux Variability Analysis (FVA)**
+   - Determine flux range for each reaction
+   - Identify metabolic bottlenecks
+   - Find robust engineering targets
+
+5. **Growth-Coupled Production**
+   - Design strains for bioproduction
+   - Couple product formation with growth
+   - Optimize yield and productivity
+
+#### Output Files
+
+The analysis generates:
+
+- `model_summary.csv`: Model statistics and information
+- `single_knockout_results.csv`: Growth effects of all gene knockouts
+- `essential_genes_results.csv`: Essential genes with detailed annotations
+- `double_knockout_results.csv`: Synthetic lethal gene pairs
+- `fva_results.csv`: Flux ranges for all reactions
+- `growth_coupled_results.csv`: Production-enhancing knockouts
+- `metabolic_analysis.pdf`: Comprehensive visualization plots
+
+#### Use Cases
+
+**Metabolic Engineering:**
+```bash
+# Optimize E. coli for succinate production
+python metabolic_target_finder.py \
+    --model_id iML1515 \
+    --ko_methods single production \
+    --target_metabolite succ_c \
+    --output_dir succinate_production
+```
+
+**Drug Target Discovery:**
+```bash
+# Find essential genes in pathogenic bacteria
+python metabolic_target_finder.py \
+    --model_file models/pathogen.xml \
+    --ko_methods essential \
+    --growth_threshold 0.05 \
+    --output_dir antibiotic_targets
+```
+
+**Cancer Research:**
+```bash
+# Identify synthetic lethal pairs in cancer metabolism
+python metabolic_target_finder.py \
+    --model_id Recon3D \
+    --ko_methods double essential \
+    --output_dir cancer_targets
+```
+
+#### Tutorial
+
+For a comprehensive guide on metabolic modeling, see the tutorial notebook:
+[metabolic_modeling/tutorial_metabolic_modeling.ipynb](metabolic_modeling/tutorial_metabolic_modeling.ipynb)
+
+The tutorial covers:
+- Loading and analyzing metabolic models
+- Flux Balance Analysis (FBA)
+- Single and double gene knockout simulations
+- Essential gene identification
+- Flux Variability Analysis (FVA)
+- Growth-coupled production strategies
+- Working with large genome-scale models
+
 
 ## Installation
 

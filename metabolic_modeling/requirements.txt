@@ -1,0 +1,38 @@
+# Metabolic Modeling Requirements
+# Install with: pip install -r requirements.txt
+
+# Core dependencies
+cobra>=0.26.0
+python-libsbml>=5.19.0
+
+# Data analysis
+pandas>=1.3.0
+numpy>=1.20.0
+
+# Visualization
+matplotlib>=3.4.0
+seaborn>=0.11.0
+
+# Optimization solvers (one of these is required)
+# GLPK (free, default)
+# Install: conda install -c conda-forge glpk
+# OR: pip install swiglpk
+
+# CPLEX (commercial, fast - IBM Academic License available)
+# Install: pip install cplex
+
+# Gurobi (commercial, fast - Academic License available)
+# Install: pip install gurobipy
+
+# Utilities
+typed-argument-parser>=1.7.0
+tqdm>=4.62.0
+
+# Optional: Advanced analysis
+optlang>=1.5.2  # For flux sampling
+scikit-learn>=1.0.0  # For ML-based analysis
+
+# Jupyter (optional, for notebooks)
+notebook>=6.4.0
+jupyterlab>=3.0.0
+ipykernel>=6.0.0

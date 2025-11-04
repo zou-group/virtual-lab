@@ -172,6 +172,10 @@ biomarker_results/
 example_biomarker_results/
 test_results/
 
+# Metabolic modeling results
+metabolic_results/
+metabolic_results_iml1515/
+
 # Pixi
 .pixi/
 pixi.lock
