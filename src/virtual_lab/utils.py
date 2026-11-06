@@ -1,6 +1,7 @@
 """Contains useful utility functions."""
 
 import json
+import time
 import urllib.parse
 from pathlib import Path
 
@@ -15,6 +16,7 @@ from virtual_lab.constants import (
     MODEL_TO_OUTPUT_PRICE_PER_TOKEN,
     FINETUNING_MODEL_TO_TRAINING_PRICE_PER_TOKEN,
     PUBMED_TOOL_NAME,
+    RETRACTION_TOOL_NAME,
 )
 from virtual_lab.prompts import format_references
 
@@ -124,6 +126,58 @@ def run_pubmed_search(query: str, num_articles: int = 3, abstract_only: bool = F
     return combined_text
 
 
+def run_retraction_check(ids: list[str]) -> str:
+    """Checks papers for retraction notices and expressions of concern using the free SaneCite API.
+
+    Only the IDs are sent. Notice data comes from the Retraction Watch database via Crossref.
+    A failed lookup is reported as not checked, never as finding no notice.
+
+    :param ids: Up to 10 DOIs, PubMed IDs, or PubMed Central IDs written with the PMC prefix.
+    :return: A plain-text report for each paper.
+    """
+    print(f"Checking {len(ids)} papers for retraction notices")
+
+    reports = []
+    for index, paper_id in enumerate(ids[:10]):
+        # The API allows 20 calls a minute
+        if index > 0:
+            time.sleep(3.1)
+        try:
+            response = requests.get("https://sanecite.com/api/check", params={"q": paper_id}, timeout=30)
+            if response.status_code == 404:
+                reports.append(f"{paper_id}: not found, so not checked.")
+                continue
+            response.raise_for_status()
+            result = response.json()
+            if result.get("ok") is not True or not isinstance(result.get("flagged"), list):
+                raise ValueError("unexpected answer")
+        except (requests.RequestException, ValueError):
+            reports.append(f"{paper_id}: the check failed, so this paper was not checked.")
+            continue
+
+        lines = [f"{paper_id}:"]
+        own = (result.get("paper") or {}).get("own")
+        if own:
+            lines.append(f"- This paper has a notice: {own.get('status')} ({own.get('notice_date')}).")
+        else:
+            lines.append("- No notice on record for this paper.")
+        lines.append(f"- References checked: {result.get('refs_checked')} of {result.get('refs_total')}.")
+        for notice in result["flagged"]:
+            lines.append(
+                f"- Cites {notice.get('doi') or notice.get('label')}: {notice.get('status')} ({notice.get('notice_date')})."
+            )
+        reports.append("\n".join(lines))
+
+    if len(ids) > 10:
+        reports.append(f"Only the first 10 of {len(ids)} papers were checked.")
+    reports.append(
+        "No notice on record does not mean a paper is sound. A cited work with a notice is not a finding against "
+        "the citing paper, which may predate the notice or cite the work to criticize it. Source: Retraction Watch "
+        "database, via Crossref, through the SaneCite API (https://sanecite.com/data)."
+    )
+    return "\n\n".join(reports)
+
+
 def run_tools(
     tool_calls: list[ChatCompletionMessageToolCall],
 ) -> tuple[list[str], list[ChatCompletionMessageParam]]:
@@ -145,6 +199,17 @@ def run_tools(
             tool_outputs.append(output)
 
             # Create tool response message for the API
+            tool_messages.append(
+                {
+                    "role": "tool",
+                    "tool_call_id": tool_call.id,
+                    "content": output,
+                }
+            )
+        elif tool_call.function.name == RETRACTION_TOOL_NAME:
+            args_dict = json.loads(tool_call.function.arguments)
+            output = run_retraction_check(**args_dict)
+            tool_outputs.append(output)
             tool_messages.append(
                 {
                     "role": "tool",
