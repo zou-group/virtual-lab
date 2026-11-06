@@ -75,3 +75,23 @@ PUBMED_TOOL_DESCRIPTION = {
         },
     },
 }
+
+RETRACTION_TOOL_NAME = "retraction_check"
+RETRACTION_TOOL_DESCRIPTION = {
+    "type": "function",
+    "function": {
+        "name": RETRACTION_TOOL_NAME,
+        "description": "Check scientific papers for retraction notices and expressions of concern, on the paper itself and on the work it cites. Finding no notice does not mean a paper is sound.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "ids": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": "Up to 10 paper IDs: DOIs, PubMed IDs, or PubMed Central IDs written with the PMC prefix, such as PMC1234567.",
+                },
+            },
+            "required": ["ids"],
+        },
+    },
+}

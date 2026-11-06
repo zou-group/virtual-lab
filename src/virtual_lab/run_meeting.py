@@ -9,7 +9,7 @@ from openai.types.chat import ChatCompletionAssistantMessageParam, ChatCompletio
 from tqdm import trange, tqdm
 
 from virtual_lab.agent import Agent
-from virtual_lab.constants import CONSISTENT_TEMPERATURE, PUBMED_TOOL_DESCRIPTION
+from virtual_lab.constants import CONSISTENT_TEMPERATURE, PUBMED_TOOL_DESCRIPTION, RETRACTION_TOOL_DESCRIPTION
 from virtual_lab.prompts import (
     individual_meeting_agent_prompt,
     individual_meeting_critic_prompt,
@@ -46,6 +46,7 @@ def run_meeting(
     num_rounds: int = 0,
     temperature: float = CONSISTENT_TEMPERATURE,
     pubmed_search: bool = False,
+    retraction_check: bool = False,
     return_summary: bool = False,
 ) -> str | None:
     """Runs a meeting with a LLM agents.
@@ -64,6 +65,7 @@ def run_meeting(
     :param num_rounds: The number of rounds of discussion.
     :param temperature: The sampling temperature.
     :param pubmed_search: Whether to include a PubMed search tool.
+    :param retraction_check: Whether to include a tool that checks papers for retraction notices.
     :param return_summary: Whether to return the summary of the meeting.
     :return: The summary of the meeting (i.e., the last message) if return_summary is True, else None.
     """
@@ -102,9 +104,11 @@ def run_meeting(
         primary_model = team_member.model
 
     # Set up tools
-    tools: list[ChatCompletionToolParam] | None = (
-        [ChatCompletionToolParam(**PUBMED_TOOL_DESCRIPTION)] if pubmed_search else None  # type: ignore[misc]
-    )
+    tools: list[ChatCompletionToolParam] = []
+    if pubmed_search:
+        tools.append(ChatCompletionToolParam(**PUBMED_TOOL_DESCRIPTION))  # type: ignore[misc]
+    if retraction_check:
+        tools.append(ChatCompletionToolParam(**RETRACTION_TOOL_DESCRIPTION))  # type: ignore[misc]
 
     # Set up tool token count
     tool_token_count = 0
